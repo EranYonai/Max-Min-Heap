@@ -50,7 +50,7 @@ class MaxMinHeap:
     def build_heap(self, unsorted_heap: list):
         self.heapob, self.size = unsorted_heap, len(unsorted_heap)
         for i in range(self.size//2, -1, -1):
-            self._trickle_down(i=i)
+            self._heapify(i=i)
 
     def heap_extract_max(self) -> Optional[int]:
         """Extracts and prints the max value in the heap.
@@ -116,18 +116,18 @@ class MaxMinHeap:
     def heap_delete(self, i: int, A: Optional[List] = None):
         pass
 
-    def _trickle_down(self, i: int) -> None:
+    def _heapify(self, i: int) -> None:
         if self._level(i) % 2 == 0:  # max level
-            self._trickle_down_max(i=i)
+            self._heapify_max(i=i)
         else:  # min level
-            self._trickle_down_min(i=i)
+            self._heapify_min(i=i)
 
-    def _trickle_down_max(self, i: int) -> None:
+    def _heapify_max(self, i: int) -> None:
         child = False
         if self.__has_children(i=i):
-            m = i * 2 + 1
-            if i * 2 + 2 > self.size and self.heapob[i*2+2] > self.heapob[m]:
-                m = i * 2 + 2
+            m = self.__get_left_child(i=i)
+            if self.__get_right_child(i=i) < self.size and self.heapob[self.__get_right_child(i=i)] > self.heapob[m]:
+                m = self.__get_right_child(i=i)
             child = True
             for j in range(i*4+3, min(i*4+7, self.size)):
                 if self.heapob[j] > self.heapob[m]:
@@ -141,14 +141,14 @@ class MaxMinHeap:
                     self.__swap_elements(i=i, j=m)
                     if self.heapob[m] < self.heapob[(m-1) // 2]:
                         self.__swap_elements(i=m, j=(m-1)//2)
-                    self._trickle_down_max(i=m)
+                    self._heapify_max(i=m)
 
-    def _trickle_down_min(self, i: int) -> None:
+    def _heapify_min(self, i: int) -> None:
         child = False
         if self.__has_children(i=i):
-            m = i * 2 + 1
-            if i * 2 + 2 < self.size and self.heapob[i*2+2] < self.heapob[m]:
-                m = i * 2 + 2
+            m = self.__get_left_child(i=i)
+            if self.__get_right_child(i=i) < self.size and self.heapob[self.__get_right_child(i=i)] < self.heapob[m]:
+                m = self.__get_right_child(i=i)
             child = True
             for j in range(i*4+3, min(i*4+7, self.size)):
                 if self.heapob[j] < self.heapob[m]:
@@ -162,7 +162,7 @@ class MaxMinHeap:
                     self.__swap_elements(i=i, j=m)
                     if self.heapob[m] > self.heapob[(m-1) // 2]:
                         self.__swap_elements(i=m, j=(m-1)//2)
-                    self._trickle_down_min(i=m)
+                    self._heapify_min(i=m)
 
     def _remove_max(self) -> None:
         if self.size == 0:
@@ -170,7 +170,7 @@ class MaxMinHeap:
         self.heapob[0] = self.heapob[-1]  # switch last element with root
         self.heapob = self.heapob[:-1]  # remove last element
         self.size = len(self.heapob)  # update size
-        self._trickle_down(i=0)
+        self._heapify(i=0)
 
     def _remove_min(self) -> None:
         if self.size == 0:
@@ -183,37 +183,41 @@ class MaxMinHeap:
             self.heapob[i] = self.heapob[self.size - 1]
             self.heapob = self.heapob[:-1]
             self.size = len(self.heapob)
-            self._trickle_down(i)
+            self._heapify(i)
 
     def _bubble_up(self, i: int) -> None:
         if self._level(i=i) % 2 == 0:
             if self.__has_parent(i=i):
                 if self.heapob[i] < self.heapob[self.__get_parent(i=i)] and i > 0:
                     self.__swap_elements(i=i, j=self.__get_parent(i=i))
-                    self._bubble_up_max(i=self.__get_parent(i=i))
+                    self._bubble_up_min(i=self.__get_parent(i=i))
                 else:
-                    self._bubble_up_min(i=i)
+                    self._bubble_up_max(i=i)
         else:
             if self.__has_parent(i=i):
                 if self.heapob[i] > self.heapob[self.__get_parent(i=i)] and i > 0:
                     self.__swap_elements(i=i, j=self.__get_parent(i=i))
-                    self._bubble_up_min(i=self.__get_parent(i))
+                    self._bubble_up_max(i=self.__get_parent(i))
                 else:
-                    self._bubble_up_max(i=i)
+                    self._bubble_up_min(i=i)
 
     def _bubble_up_max(self, i: int) -> None:
-        if self.__has_grandparent(i=i):
-            if self.heapob[i] > self.heapob[self.__get_parent(i=i)]:
-                self.__swap_elements(i=i, j=self.__get_parent(i=i))
-                self._bubble_up_max(self.__get_parent(i=i))
-        # elif self.__has_parent(i=i) and self.heapob[self.__get_parent(i=i)] < self.heapob[i]:
-        #     self.__swap_elements(i=i, j=self.__get_parent(i=i))
+        while i > 2:
+            grand_parent = self.__get_grandparent(i=i)
+            if self.heapob[i] > self.heapob[grand_parent]:
+                self.__swap_elements(i=i, j=grand_parent)
+                i = grand_parent
+            else:
+                return
 
     def _bubble_up_min(self, i: int) -> None:
-        if self.__has_grandparent(i=i):
-            if self.heapob[i] < self.heapob[self.__get_parent(i=i)]:
-                self.__swap_elements(i=i, j=self.__get_parent(i=i))
-                self._bubble_up_min(self.__get_parent(i=i))
+        while i > 2:
+            grand_parent = self.__get_grandparent(i=i)
+            if self.heapob[i] < self.heapob[grand_parent]:
+                self.__swap_elements(i=i, j=grand_parent)
+                i = grand_parent
+            else:
+                return
 
     def __swap_elements(self, i: int, j: int) -> None:
         self.heapob[i], self.heapob[j] = self.heapob[j], self.heapob[i]
@@ -236,7 +240,7 @@ class MaxMinHeap:
         return self.__get_parent(i=i) != -1
 
     def __get_grandparent(self, i: int) -> int:
-        return self.__get_parent(i=i//2)
+        return self.__get_parent(i=(i-1)//2)
 
     def __has_grandparent(self, i: int) -> bool:
         return self.__get_grandparent(i=i) != -1
@@ -290,25 +294,46 @@ class TestClass:
         total_runs = 500
         for i in range(total_runs):
             random_list = []
-            for i in range(random.randint(1, 10)):
-                random_list.append(random.randint(0, 500))
+            for i in range(random.randint(1, 512)):
+                random_list.append(random.randint(-2000, 2000))
             test_heap = MaxMinHeap()
-            # test_heap.build_heap(unsorted_heap=random_list)
-            for i in random_list:
-                test_heap.heap_insert(key=i)
-            # print(f"List before building heap: {random_list} After: {test_heap.heapob}")
+            test_heap.build_heap(unsorted_heap=random_list)
             if not (TestClass._is_max_min_heap(test_heap)):
-                print(f"Failed to build heap with array: {test_heap.heapob}, heap: {test_heap.heapob}")
+                print(f"Failed to build heap with array: {random_list}, heap: {test_heap.heapob}")
                 fail_count += 1
                 if len(test_heap.heapob) != test_heap.size:
                     print(f"Wrong size!, heapleb: {len(test_heap.heapob)}, size: {test_heap.size}")
         if fail_count > 0:
-            print(f"Fail/Total: {fail_count}/{total_runs}")
+            return (f"Fail/Total: {fail_count}/{total_runs}")
         else:
-            print(f"All {total_runs} attempts PASSED.")
+            return (f"All {total_runs} attempts PASSED.")
+
+    @staticmethod
+    def test_insert_heap():
+            import random
+            fail_count = 0
+            total_runs = 500
+            for i in range(total_runs):
+                random_list = []
+                for i in range(random.randint(1, 512)):
+                    random_list.append(random.randint(-2000, 2000))
+                test_heap = MaxMinHeap()
+                for element in random_list:
+                    test_heap.heap_insert(key=element)
+                if not (TestClass._is_max_min_heap(test_heap)):
+                    print(f"Failed to build heap with array: {random_list}, heap: {test_heap.heapob}")
+                    fail_count += 1
+                    if len(test_heap.heapob) != test_heap.size:
+                        print(f"Wrong size!, heapleb: {len(test_heap.heapob)}, size: {test_heap.size}")
+            if fail_count > 0:
+                return (f"Fail/Total: {fail_count}/{total_runs}")
+            else:
+                return (f"All {total_runs} attempts PASSED.")
 
     @staticmethod
     def _is_max_min_heap(heap: MaxMinHeap):
+        if heap.size == 0:
+            return False
         for index, value in enumerate(heap.heapob):
             if heap._level(index) % 2 == 0:  # max level
                 for j in range(2 * index + 1, min(2 * index + 3, heap.size)):
@@ -342,6 +367,10 @@ def main():
 if __name__ == "__main__":
     # Start UserHandler
     x = MaxMinHeap()
-    # for element in [109,24,6,453,441]:
+    # for element in [5, 300, 74, 219, 200, 147, 169, 459, 141, 289]:
     #     x.heap_insert(element)
-    TestClass.test_build_heap()
+    # print(TestClass._is_max_min_heap(x))
+    build_test_results = TestClass.test_build_heap()
+    insert_test_results = TestClass.test_insert_heap()
+    print(f"Build test results: {build_test_results}")
+    print(f"Insert test results: {insert_test_results}")
