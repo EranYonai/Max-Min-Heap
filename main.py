@@ -54,7 +54,7 @@ class MaxMinHeap:
         self.size = len(unsorted_heap)
         self.heapob = unsorted_heap
         for i in range(self.size//2, -1, -1):
-            self._trickle_down(i=i)
+            self._heapify(i=i)
 
     def heap_extract_max(self) -> Optional[int]:
         """Extracts and prints the max value in the heap.
@@ -115,7 +115,7 @@ class MaxMinHeap:
 
         self.heapob.append(key)
         self.size += 1
-        self._bubble_up(self.size)
+        # self._bubble_up(self.size)
 
     def heap_delete(self, i: int, A: Optional[List] = None):
         pass
@@ -128,53 +128,45 @@ class MaxMinHeap:
         self.heapob = heap.copy()
         self.size = len(self.heapob)
 
-    def _trickle_down(self, i: int) -> None:
+    def _heapify(self, i: int, down: bool = False) -> None:
         if self._level(i) % 2 == 0:  # max level
-            self._trickle_down_max(i=i)
+            self._max_heapify(i=i, down=down)
         else:  # min level
-            self._trickle_down_min(i=i)
+            self._min_heapify(i=i, down=down)
 
-    def _trickle_down_max(self, i: int) -> None:
-        child = False
-        if self.__element_has_children(i=i):
-            m = i * 2 + 1
-            if i * 2 + 2 > self.size and self.heapob[i*2+2] > self.heapob[m]:
-                m = i * 2 + 2
-            child = True
-            for j in range(i*4+3, min(i*4+7, self.size)):
-                if self.heapob[j] > self.heapob[m]:
-                    m = j
-                    child = False
-            if child:
-                if self.heapob[m] > self.heapob[i]:
-                    self.__switch_elements(i=i, j=m)
-            else:
-                if self.heapob[m] > self.heapob[i]:
-                    self.__switch_elements(i=i, j=m)
-                    if self.heapob[m] < self.heapob[(m-1) // 2]:
-                        self.__switch_elements(i=m, j=(m-1)//2)
-                    self._trickle_down_max(i=m)
+    def _max_heapify(self, i: int, down: bool = False) -> None:
+        lower_than_max, parent_is_lower, biggest_in_subtree, max_below = self.__get_depth_info(i, is_max=True)
+        if down:
+            lower_than_max = parent_is_lower = True
+        if not lower_than_max:
+            max_up = self._get_parent(self._get_parent(i))
+            self.__switch_elements(i=max_up, j=i)
+            self._max_heapify(i=max_up)
+        elif not parent_is_lower:
+            self.__switch_elements(i=i, j=self._get_parent(i))
+            self._min_heapify(i=self._get_parent(i), down=True)
+            self._max_heapify(i=i)
+        elif not biggest_in_subtree:
+            self.__switch_elements(i=i, j=max_below)
+            if self._level(i=max_below) % 2 == 0:
+                self._max_heapify(i=max_below)
 
-    def _trickle_down_min(self, i: int) -> None:
-        child = False
-        if self.__element_has_children(i=i):
-            m = i * 2 + 1
-            if i * 2 + 2 < self.size and self.heapob[i*2+2] < self.heapob[m]:
-                m = i * 2 + 2
-            child = True
-            for j in range(i*4+3, min(i*4+7, self.size)):
-                if self.heapob[j] < self.heapob[m]:
-                    m = j
-                    child = False
-            if child:
-                if self.heapob[m] < self.heapob[i]:
-                    self.__switch_elements(i=i, j=m)
-            else:
-                if self.heapob[m] < self.heapob[i]:
-                    self.__switch_elements(i=i, j=m)
-                    if self.heapob[m] > self.heapob[(m-1) // 2]:
-                        self.__switch_elements(i=m, j=(m-1)//2)
-                    self._trickle_down_min(i=m)
+    def _min_heapify(self, i: int, down: bool = False) -> None:
+        bigger_than_min, parent_is_bigger, lower_in_subtree, min_below = self.__get_depth_info(i, is_max=False)
+        if down:
+            bigger_than_min = parent_is_bigger = True
+        if not bigger_than_min:
+            min_above = self._get_parent(self._get_parent(i))
+            self.__switch_elements(i=min_above, j=i)
+            self._min_heapify(i=min_above)
+        elif not parent_is_bigger:
+            self.__switch_elements(i=i, j=self._get_parent(i))
+            self._max_heapify(i=self._get_parent(i), down=True)
+            self._min_heapify(i=i)
+        elif not lower_in_subtree:
+            self.__switch_elements(i=i, j=min_below)
+            if self._level(i=min_below) % 2 != 0:
+                self._min_heapify(i=min_below)
 
     def _remove_max(self) -> None:
         if self.size == 0:
@@ -182,35 +174,64 @@ class MaxMinHeap:
         self.heapob[0] = self.heapob[-1]  # switch last element with root
         self.heapob = self.heapob[:-1]  # remove last element
         self.size = len(self.heapob)  # update size
-        self._trickle_down(i=0)
+        self._heapify(i=0)
 
     def _remove_min(self) -> None:
         if self.size == 0:
             return
         if self.size == 1 or self.size == 2:
-            self.heabob = self.heapob[:-1]  # removes last element
-            self.size = len(self.heabob)
+            self.heapob = self.heapob[:-1]  # removes last element
+            self.size = len(self.heapob)
         else:
             i = 1 if self.heapob[1] < self.heapob[2] else 2
             self.heapob[i] = self.heapob[self.size - 1]
             self.heapob = self.heapob[:-1]
             self.size = len(self.heapob)
-            self._trickle_down(i)
-    
-    def _bubble_up(self, i: int) -> None:
-        pass
-    
-    def _bubble_up_max(self, i: int) -> None:
-        pass
-    
-    def _bubble_up_min(self, i: int) -> None:
-        pass
+            self._heapify(i)
     
     def __switch_elements(self, i: int, j: int) -> None:
         self.heapob[i], self.heapob[j] = self.heapob[j], self.heapob[i]
         
     def __element_has_children(self, i: int) -> bool:
-        return self.size > i * 2 +1
+        return self.size > i * 2 + 1
+    
+    @staticmethod
+    def _get_parent(i: int) -> int:
+        return i // 2 + 1
+
+    def __get_depth_info(self, i: int, is_max: bool) -> tuple:
+        def _bigger(a, b):
+            return a > b
+
+        def _smaller(a, b):
+            return a < b
+        
+        order = _bigger if is_max else _smaller
+        
+        def _orderq(a: int, b: int) -> bool:
+            
+            return order(a, b) or a == b
+        
+        grand_parent_relation = False
+        parent_relation = False
+        subtree_relation = False
+        wrong_gchild = -1
+        
+        if not self.size > i or _orderq(self._get_parent(self._get_parent(i)), i):
+            grand_parent_relation = True
+        if not self.size > i or _orderq(i, self._get_parent(i)):
+            parent_relation = True
+        if not self.size > (i*2+1) and not self.size > (i*2+2):  # doesn't have children
+            subtree_relation = True
+        else:
+            for j in range(i * 4 + 3, min(i * 4 + 5, self.size)):
+                if not self.size > j:
+                    break
+                if order(self.heapob[j], self.heapob[wrong_gchild]):
+                    wrong_gchild = j
+            if _orderq(self.heapob[i], self.heapob[wrong_gchild]):
+                subtree_relation = True
+        return (grand_parent_relation, parent_relation, subtree_relation, wrong_gchild)
 
 
 class InputHandler:
