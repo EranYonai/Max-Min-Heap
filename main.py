@@ -136,7 +136,7 @@ class MaxMinHeap:
 
     def _trickle_down_max(self, i: int) -> None:
         child = False
-        if self.size > i * 2 + 1:  # element i has children
+        if self.__element_has_children(i=i):
             m = i * 2 + 1
             if i * 2 + 2 > self.size and self.heapob[i*2+2] > self.heapob[m]:
                 m = i * 2 + 2
@@ -147,17 +147,17 @@ class MaxMinHeap:
                     child = False
             if child:
                 if self.heapob[m] > self.heapob[i]:
-                    self.heapob[i], self.heapob[m] = self.heapob[m], self.heapob[i]  # switch values
+                    self.__switch_elements(i=i, j=m)
             else:
                 if self.heapob[m] > self.heapob[i]:
-                    self.heapob[i], self.heapob[m] = self.heapob[m], self.heapob[i]
+                    self.__switch_elements(i=i, j=m)
                     if self.heapob[m] < self.heapob[(m-1) // 2]:
-                        self.heapob[m], self.heapob[(m-1)//2] = self.heapob[(m-1)//2], self.heapob[m]
+                        self.__switch_elements(i=m, j=(m-1)//2)
                     self._trickle_down_max(i=m)
 
     def _trickle_down_min(self, i: int) -> None:
         child = False
-        if self.size > i * 2 + 1:  # element i has children
+        if self.__element_has_children(i=i):
             m = i * 2 + 1
             if i * 2 + 2 < self.size and self.heapob[i*2+2] < self.heapob[m]:
                 m = i * 2 + 2
@@ -168,12 +168,12 @@ class MaxMinHeap:
                     child = False
             if child:
                 if self.heapob[m] < self.heapob[i]:
-                    self.heapob[i], self.heapob[m] = self.heapob[m], self.heapob[i]  # switch values
+                    self.__switch_elements(i=i, j=m)
             else:
                 if self.heapob[m] < self.heapob[i]:
-                    self.heapob[i], self.heapob[m] = self.heapob[m], self.heapob[i]
+                    self.__switch_elements(i=i, j=m)
                     if self.heapob[m] > self.heapob[(m-1) // 2]:
-                        self.heapob[m], self.heapob[(m-1)//2] = self.heapob[(m-1)//2], self.heapob[m]
+                        self.__switch_elements(i=m, j=(m-1)//2)
                     self._trickle_down_min(i=m)
 
     def _remove_max(self) -> None:
@@ -205,6 +205,12 @@ class MaxMinHeap:
     
     def _bubble_up_min(self, i: int) -> None:
         pass
+    
+    def __switch_elements(self, i: int, j: int) -> None:
+        self.heapob[i], self.heapob[j] = self.heapob[j], self.heapob[i]
+        
+    def __element_has_children(self, i: int) -> bool:
+        return self.size > i * 2 +1
 
 
 class InputHandler:
