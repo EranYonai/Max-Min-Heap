@@ -20,6 +20,7 @@ class MaxMinHeap:
                17  18               |3 <=
         as a list: [50,15,10,25,35,11,12,17,18]
     """
+
     def __init__(self):
         """Initializes empty MaxMinHeap object.
             Use _set_heap to set heap values (for a MaxMinHeap). (already an heap)
@@ -38,7 +39,7 @@ class MaxMinHeap:
 
     def build_heap(self, unsorted_heap: list):
         """Building heap using heapify (top-bottom).
-        Complexity: ()
+        Complexity: O(n)
 
         :param unsorted_heap: _description_
         :type unsorted_heap: list
@@ -89,7 +90,8 @@ class MaxMinHeap:
             self.heapob = self.heapob[:-1]
             self.size = len(self.heapob)  # or 1
             print(f"Minimum element in heap: {min_element}")
-            return min_element  # heap length is 2, the only child is the minimum.
+            # heap length is 2, the only child is the minimum.
+            return min_element
         min_element = min(self.heapob[1], self.heapob[2])
         self._remove_min()
         print(f"Minimum element in heap: {min_element}")
@@ -112,12 +114,25 @@ class MaxMinHeap:
         pass
 
     def _heapify(self, i: int) -> None:
+        """heapify common algorithm for max-min modifications, runs in O(log n)
+        builds heap from up to bottom
+
+        :param i: an index
+        :type i: int
+        """
         if self._level(i) % 2 == 0:  # max level
             self._heapify_max(i=i)
         else:  # min level
             self._heapify_min(i=i)
 
     def _heapify_max(self, i: int) -> None:
+        """help function for heapify.
+        assumes that index is a valid index, in an even depth in the heap.
+        moves index to a the correct place.
+
+        :param i: index
+        :type i: int
+        """
         child = False
         if self.__has_children(i=i):
             m = self.__get_left_child(i=i)
@@ -139,6 +154,13 @@ class MaxMinHeap:
                     self._heapify_max(i=m)
 
     def _heapify_min(self, i: int) -> None:
+        """help function for heapify.
+        assumes that index is a valid index, in an even depth in the heap.
+        moves index to a the correct place.
+
+        :param i: _description_
+        :type i: int
+        """
         child = False
         if self.__has_children(i=i):
             m = self.__get_left_child(i=i)
@@ -160,6 +182,8 @@ class MaxMinHeap:
                     self._heapify_min(i=m)
 
     def _remove_max(self) -> None:
+        """removes max element of heap.
+        """
         if self.size == 0:
             return
         self.heapob[0] = self.heapob[-1]  # switch last element with root
@@ -168,11 +192,13 @@ class MaxMinHeap:
         self._heapify(i=0)
 
     def _remove_min(self) -> None:
+        """removes min element of heap.
+        """
         if self.size == 0:
             return
         if self.size == 1 or self.size == 2:
-            self.heabob = self.heapob[:-1]  # removes last element
-            self.size = len(self.heabob)
+            self.heapob = self.heapob[:-1]  # removes last element
+            self.size = len(self.heapob)
         else:
             i = 1 if self.heapob[1] < self.heapob[2] else 2
             self.heapob[i] = self.heapob[self.size - 1]
@@ -181,6 +207,11 @@ class MaxMinHeap:
             self._heapify(i)
 
     def _bubble_up(self, i: int) -> None:
+        """uses bubble_up_min and _max for moving up an element in the heap.
+
+        :param i: index
+        :type i: int
+        """
         if self._level(i=i) % 2 == 0:
             if self.__has_parent(i=i):
                 if self.heapob[i] < self.heapob[self.__get_parent(i=i)] and i > 0:
@@ -197,6 +228,12 @@ class MaxMinHeap:
                     self._bubble_up_min(i=i)
 
     def _bubble_up_max(self, i: int) -> None:
+        """bubble up max moves the newly inserted node to the top of the heap,
+        swapping it with its parent if necessary until it is greater than or equal to its parent.
+
+        :param i: index
+        :type i: int
+        """
         while i > 2:
             grand_parent = self.__get_grandparent(i=i)
             if self.heapob[i] > self.heapob[grand_parent]:
@@ -206,6 +243,12 @@ class MaxMinHeap:
                 return
 
     def _bubble_up_min(self, i: int) -> None:
+        """bubble up min moves the newly inserted node to the top of the heap,
+        swapping it with its parent if necessary until it is less than or equal to its parent.
+
+        :param i: index
+        :type i: int
+        """
         while i > 2:
             grand_parent = self.__get_grandparent(i=i)
             if self.heapob[i] < self.heapob[grand_parent]:
@@ -215,36 +258,92 @@ class MaxMinHeap:
                 return
 
     def __swap_elements(self, i: int, j: int) -> None:
+        """swaps two elements
+
+        :param i: element 1
+        :type i: int
+        :param j: element 2
+        :type j: int
+        """
         self.heapob[i], self.heapob[j] = self.heapob[j], self.heapob[i]
 
     def __has_children(self, i: int) -> bool:
+        """returns if a node has at least 1 child.
+
+        :param i: index
+        :type i: int
+        :rtype: bool
+        """
         return self.size > i * 2 + 1 or self.size > i * 2 + 2
 
     def __get_left_child(self, i: int) -> int:
+        """gets left child of the node if exists.
+
+        :param i: index
+        :type i: int
+        :return: left child or -1 if does not exist.
+        :rtype: int
+        """
         left_child = i * 2 + 1
         return left_child if self.size > left_child else -1
 
     def __get_right_child(self, i: int) -> int:
+        """gets right child of the node if exists.
+
+        :param i: index
+        :type i: int
+        :return: right child or -1 if does not exist.
+        :rtype: int
+        """
         right_child = i * 2 + 2
         return right_child if self.size > right_child else -1
 
     def __get_parent(self, i: int) -> int:
+        """gets parent of a node
+
+        :param i: index
+        :type i: int
+        :return: returns the parent node index, -1 if it's the root.
+        :rtype: int
+        """
         return (i-1) // 2
 
-    def __has_parent(self, i: int) -> int:
+    def __has_parent(self, i: int) -> bool:
+        """returns if a node has parent.
+
+        :param i: index
+        :type i: int
+        :return: true if node has a parent
+        :rtype: bool
+        """
         return self.__get_parent(i=i) != -1
 
     def __get_grandparent(self, i: int) -> int:
-        return self.__get_parent(i=(i-1)//2)
+        """gets grand-parent of a node.
 
-    def __has_grandparent(self, i: int) -> bool:
-        return self.__get_grandparent(i=i) != -1
+        :param i: index
+        :type i: int
+        :return: grand-parent index, -1 if does not exit.
+        :rtype: int
+        """
+        return self.__get_parent(i=(i-1)//2)
 
     @staticmethod
     def _level(i: int) -> int:
+        """returns the level (height, depth) of a node.
+
+        :param i: index
+        :type i: int
+        :return: level of the node.
+        :rtype: int
+        """
         return math.floor(math.log2(i+1))
 
     def _set_heap(self, heap: list) -> None:
+        """manually sets heap, don't use!, force injecting.
+
+        :param heap: list to inject.
+        :type heap: list
+        """
         self.heapob = heap.copy()
         self.size = len(self.heapob)
-

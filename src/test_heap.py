@@ -5,6 +5,32 @@ from max_min_heap import MaxMinHeap
 
 class TestClass:
     @staticmethod
+    def test_remove_min_max():
+        fail_count = 0
+        total_runs = 500
+        test_max = True
+        for _ in range(total_runs):
+            random_list = []
+            for _ in range(random.randint(1, 15)):
+                random_list.append(random.randint(-2000, 2000))
+            test_heap = MaxMinHeap()
+            test_heap.build_heap(unsorted_heap=random_list)
+            for _ in range(test_heap.size):
+                if test_max:
+                    test_heap.heap_extract_max()
+                    if not (TestClass._is_max_min_heap(test_heap)):
+                        print(f"Failed to extract max from heap: {test_heap.heapob}")
+                        fail_count += 1
+                else:
+                    test_heap.heap_extract_min()
+                    if not (TestClass._is_max_min_heap(test_heap)):
+                        print(f"Failed to extract min from heap: {test_heap.heapob}")
+                        fail_count += 1
+        if fail_count > 0:
+            return (f"Fail/Total: {fail_count}/{total_runs} (fail for each attempt)")
+        return (f"All {total_runs} attempts PASSED.")
+
+    @staticmethod
     def test_build_heap():
         fail_count = 0
         total_runs = 500
@@ -15,35 +41,37 @@ class TestClass:
             test_heap = MaxMinHeap()
             test_heap.build_heap(unsorted_heap=random_list)
             if not (TestClass._is_max_min_heap(test_heap)):
-                print(f"Failed to build heap with array: {random_list}, heap: {test_heap.heapob}")
+                print(
+                    f"Failed to build heap with array: {random_list}, heap: {test_heap.heapob}")
                 fail_count += 1
                 if len(test_heap.heapob) != test_heap.size:
-                    print(f"Wrong size!, heapleb: {len(test_heap.heapob)}, size: {test_heap.size}")
+                    print(
+                        f"Wrong size!, heapleb: {len(test_heap.heapob)}, size: {test_heap.size}")
         if fail_count > 0:
             return (f"Fail/Total: {fail_count}/{total_runs}")
-        else:
-            return (f"All {total_runs} attempts PASSED.")
+        return (f"All {total_runs} attempts PASSED.")
 
     @staticmethod
     def test_insert_heap():
         fail_count = 0
         total_runs = 500
-        for i in range(total_runs):
+        for _ in range(total_runs):
             random_list = []
-            for i in range(random.randint(1, 512)):
+            for _ in range(random.randint(1, 512)):
                 random_list.append(random.randint(-2000, 2000))
             test_heap = MaxMinHeap()
             for element in random_list:
                 test_heap.heap_insert(key=element)
             if not (TestClass._is_max_min_heap(test_heap)):
-                print(f"Failed to build heap with array: {random_list}, heap: {test_heap.heapob}")
+                print(
+                    f"Failed to build heap with array: {random_list}, heap: {test_heap.heapob}")
                 fail_count += 1
                 if len(test_heap.heapob) != test_heap.size:
-                    print(f"Wrong size!, heapleb: {len(test_heap.heapob)}, size: {test_heap.size}")
+                    print(
+                        f"Wrong size!, heapleb: {len(test_heap.heapob)}, size: {test_heap.size}")
         if fail_count > 0:
             return (f"Fail/Total: {fail_count}/{total_runs}")
-        else:
-            return (f"All {total_runs} attempts PASSED.")
+        return (f"All {total_runs} attempts PASSED.")
 
     @staticmethod
     def _is_max_min_heap(heap: MaxMinHeap):
@@ -78,5 +106,7 @@ class TestClass:
 if __name__ == "__main__":
     build_test_results = TestClass.test_build_heap()
     insert_test_results = TestClass.test_insert_heap()
+    extract_test_results = TestClass.test_remove_min_max()
     print(f"Build test results: {build_test_results}")
     print(f"Insert test results: {insert_test_results}")
+    print(f"Extract test results: {extract_test_results}")
