@@ -9,3 +9,9 @@ I wrote MaxMinHeap class, using OOP practices. I think it is a better implementa
 - Sources:
     1. https://en.wikipedia.org/wiki/Min-max_heap
     2. Implementation of a Min-max heap following Atkinson, Sack, Santoro, and Strothotte (1986): https://doi.org/101145/6617.6621
+
+---
+
+## Usage:
+1. Install environment `pip install -r requirements.txt`
+2. Run driver `python3 driver_RUNME.py`
