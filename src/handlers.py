@@ -1,6 +1,7 @@
 from max_min_heap import MaxMinHeap
 from test_heap import TestClass
 from dataclasses import dataclass
+from typing import Union
 import sys
 
 from drawtree import draw_level_order
@@ -9,19 +10,20 @@ from drawtree import draw_level_order
 class InputHandler:
     @staticmethod
     def read_file_and_parse(file_path: str) -> list:
+        file_path = file_path.strip()
         with open(file_path, 'r') as f:
             file_content: list = f.readlines()
-        return InputHandler._parse_file(file_data=file_content)
+        return InputHandler.get_first_input(InputHandler._parse_file(file_data=file_content))
 
     @staticmethod
     def _parse_file(file_data: list) -> list:
-        file_data = [line.rstrip('\n').remove('[').remove(']') for line in file_data]
+        file_data = [line.rstrip('\n').replace('[', '').replace(']', '') for line in file_data]
         file_data = [line.split(',') for line in file_data]
         return file_data
 
     @staticmethod
     def get_first_input(file_data: list) -> list:
-        return file_data[0]
+        return [int(element) for element in file_data[0]]
 
 
 class UserHandler:
@@ -34,31 +36,53 @@ class UserHandler:
 
     def __init__(self) -> None:
         self.max_min_heap = MaxMinHeap()
+        self.alive = True
 
-    def print_heap(self):
-        pass
+    def _print_heap(self):
+        draw_level_order(str(self.max_min_heap.heapob))
+        print(f"Heap size: {self.max_min_heap.size}")
 
-    def _prompt_input_file(self) -> str:
-        return ''
-    
-    def _get_user_input(self, prompt):
+    def get_user_input(self, prompt) -> Union[str, int]:
         user_input = input(prompt).strip()
         try:
             m = int(user_input)
             return m
-        except:
+        except:  # pylint: disable=E722, W0702
             return user_input
 
     def _build_cli_heap(self):
-        pass
+        stop = False
+        print("To stop inserting elements, write a not integer, to print write print")
+        while not stop:
+            inp = self.get_user_input(prompt="Please enter an element for insertion: ")
+            if self._is_str(inp):
+                stop = True
+            else:
+                self.max_min_heap.heap_insert(key=inp)  # type: ignore
+                self._print_heap()
 
-    def _operate_on_heap(self, action):
+    def operate_on_heap(self, action):
+        if action > Actions.NUM_ACTIONS:
+            print("Invalid action.")
+            return
+        if action not in [1, 2, 3] and self.max_min_heap.size == 0:
+            print("Invalid action")
+            return
         if action == Actions.EXIT:
-            pass
+            print("Bye Bye...")
+            self.alive = False
         elif action == Actions.BUILD_HEAP:
-            self._build_cli_heap()
+            inp = self.get_user_input(prompt="1 to build with cli, 2 to heap from file: ")
+            if inp == 1:
+                self._build_cli_heap()
+            else:
+                inp = self.get_user_input(prompt="Enter full file location: ")
+                if self._is_str(inp):
+                    self.max_min_heap.build_heap(InputHandler.read_file_and_parse(file_path=inp))  # type: ignore
+                else:
+                    print("Input is not string.")
         elif action == Actions.PRINT_HEAP:
-            draw_level_order(str(self.max_min_heap.heapob))
+            self._print_heap()
         elif action == Actions.HEAPEX_MAX:
             if self.max_min_heap.size < 1:
                 print("Heap is empty, can't extract.")
@@ -70,69 +94,76 @@ class UserHandler:
             else:
                 self.max_min_heap.heap_extract_min()
         elif action == Actions.HEAP_INS:
-            key = self._get_user_input("Enter value to insert: ")
+            key = self.get_user_input("Enter value to insert: ")
             if self._is_str(key):
-                print("Invalid index '%s' - not a number." % key)
+                print(f"Invalid index '{key}' - not a number.")
             elif key == sys.maxsize:
-                print("Invalid number: The number %d shouldn't be used. Enter a smaller number" % key)
+                print(f"Invalid number: The number {key} is not allowed. Enter a smaller number")
             else:
-                self.__heap.heapInsert(key)
+                self.max_min_heap.heap_insert(key=key)  # type: ignore
         elif action == Actions.HEAP_DEL:
-            idx = self.__getUserInt("Put index of an item to delete: ")
-            if IsStr(idx):
-                print("Invalid index '%s' - not a number." % idx)
-            elif not self.__heap.validIdx(idx):
-                print("Invalid index %d - not in range." % idx)
+            idx = self.get_user_input("Enter an index of an item to delete (1 is the root): ")
+            if self._is_str(idx):
+                print(f"Invalid index '{idx}' - not a number.")
+            elif self.max_min_heap.size <= idx-1:  # type: ignore
+                print(self.max_min_heap.size)
+                print(f"Invalid index {idx} - not in range.")
             else:
-                self.__heap.heapDelete(idx)
-        elif action == Actions.HEAPSORT:
-            self._userHeapsort()
+                self.max_min_heap.heap_delete(i=idx)  # type: ignore
+        elif action == Actions.RUN_TESTS:
+            print("Running tests... it might take some time, depends on your hardware.")
+            print("Tests are randomizing lists [1-512 length], with integers [-2000-2000], running 1000 times each.")
+            self._run_tests()
 
-        return len(self.__heap) > 0
-
-    def start(self):
-        pass
-    
     def _print_base_menu(self):
         print("""Options menu:
-                1) Exit.
-                2) Build Heap.
-                """)
-    
+            1) Exit.
+            2) Build Heap.
+            3) Run Tests.""", end='')
+
     def _print_extended_menu(self):
-        print("""3) Print Heap.
-                4) Extract Max.
-                5) Extract Min.
-                6) Insert.
-                7) Delete.
-                8) Heap-Sort.
-                    """)
-        print("Type 'help' to show the menu again.")
+        print("""\n\t4) Print Heap.
+            5) Extract Max.
+            6) Extract Min.
+            7) Insert.
+            8) Delete.""")
 
     @staticmethod
     def _is_str(action):
-        return type(action) == str
+        return isinstance(action, str)
+
+    def _run_tests(self):
+        print("Testing Build Heap")
+        build_test_results = TestClass.test_build_heap()
+        print("Testing Heap Insert")
+        insert_test_results = TestClass.test_insert_heap()
+        print("Testing Extract min/max (no printing), extracting every element from heap...")
+        extract_test_results = TestClass.test_remove_min_max()
+        print("Testing Heap Delete, removing every element from the heap...")
+        delete_test_results = TestClass.test_delete()
+        print("Done!")
+        print(f"Build test results: {build_test_results}")
+        print(f"Insert test results: {insert_test_results}")
+        print(f"Extract test results: {extract_test_results}")
+        print(f"Delete test results: {delete_test_results}")
+
+    def show_menu(self):
+        if self.max_min_heap.size == 0:
+            print("Heap is empty, build heap in order to see extended menu.")
+            self._print_base_menu()
+        else:
+            self._print_base_menu()
+            self._print_extended_menu()
 
 
 @dataclass
 class Actions:
     EXIT = 1
     BUILD_HEAP = 2
-    PRINT_HEAP = 3
-    HEAPEX_MAX = 4  # EX=EXTRACT
-    HEAPEX_MIN = 5
-    HEAP_INS = 6
-    HEAP_DEL = 7
-    HEAPSORT = 8
+    RUN_TESTS = 3
+    PRINT_HEAP = 4
+    HEAPEX_MAX = 5  # EX=EXTRACT
+    HEAPEX_MIN = 6
+    HEAP_INS = 7
+    HEAP_DEL = 8
     NUM_ACTIONS = 8
-
-if __name__ == "__main__":
-    # Start UserHandler
-    x = MaxMinHeap()
-    # for element in [5, 300, 74, 219, 200, 147, 169, 459, 141, 289]:
-    #     x.heap_insert(element)
-    # print(TestClass._is_max_min_heap(x))
-    build_test_results = TestClass.test_build_heap()
-    insert_test_results = TestClass.test_insert_heap()
-    print(f"Build test results: {build_test_results}")
-    print(f"Insert test results: {insert_test_results}")
