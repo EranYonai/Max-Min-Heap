@@ -117,23 +117,27 @@ class MaxMinHeap:
 
     def heap_delete(self, i: int):
         """deletes the element in index *i-1!* from the heap.
-        Complexity same as _heapify: O(nlogn)
+        Complexity same as _heapify: O(n) same as build_heap.
 
         :param i: index to remove from heap.
         :type i: int
         """
-        i -= 1
-        if i >= self.size:
-            print("Index is not in range of heap.")
-            return
-        elif i == 0:
-            self.heap_extract_max(to_print=False)
-        else:
-            self.heapob[i] = sys.maxsize
-            self._bubble_up(i=i)  # move to root, O(log n)
-            self.heap_extract_max(to_print=False)  # O(log n)
-            for i in range(self.size-1, self.size // 2 - 1, -1):
-                self._bubble_up(i=i)
+        # this route is the efficient one, but doesn't work for edge cases for some reason.
+        # and i'm tired of debugging :), alternative solution is O(n)
+        # i -= 1  
+        # if i >= self.size:
+        #     print("Index is not in range of heap.")
+        #     return
+        # elif i == 0:
+        #     self.heap_extract_max(to_print=False)
+        # else:
+        #     self.heapob[i] = sys.maxsize
+        #     self._bubble_up(i=i)  # move to root, O(log n)
+        #     self.heap_extract_max(to_print=False)  # O(log n)
+        
+        #  the easy way is:
+        self.heapob.pop(i - 1)
+        self.build_heap(unsorted_heap=self.heapob)
 
     def _heapify(self, i: int) -> None:
         """heapify common algorithm for max-min modifications, runs in O(log n)

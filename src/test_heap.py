@@ -9,22 +9,17 @@ class TestClass:
         fail_count = 0
         for _ in range(total_runs):
             random_list = []
-            for _ in range(random.randint(1, 20)):
-                random_list.append(random.randint(1, 2000))
+            for _ in range(random.randint(1, 512)):
+                random_list.append(random.randint(-2000, 2000))
             test_heap = MaxMinHeap()
-            print("-----")
             test_heap.build_heap(unsorted_heap=random_list)
-            print(test_heap.heapob)
-            print(f"test result of build_heap: {(TestClass._is_max_min_heap(test_heap))}")
             for _ in range(test_heap.size):
                 index_to_delete = random.randint(1, test_heap.size)
-                print(test_heap.heapob)
                 test_heap.heap_delete(i=index_to_delete)
                 if test_heap.size == 0:
                     break
                 if not (TestClass._is_max_min_heap(test_heap)):
                     print(f"Failed to delete an element {test_heap.heapob}, attempted to delete {index_to_delete}, size {test_heap.size}")
-                    print("-----")
                     fail_count += 1
         if fail_count > 0:
             return (f"Fail/Total: {fail_count}/{total_runs} (fail for each attempt)")

@@ -124,7 +124,7 @@ class UserHandler:
             3) Run Tests.""", end='')
 
     def _print_extended_menu(self):
-        print("""\n\t4) Print Heap.
+        print("""\n\t    4) Print Heap.
             5) Extract Max.
             6) Extract Min.
             7) Insert.
@@ -139,9 +139,9 @@ class UserHandler:
         build_test_results = TestClass.test_build_heap(total_runs=1000)
         print("Testing Heap Insert")
         insert_test_results = TestClass.test_insert_heap(total_runs=1000)
-        print("Testing Extract min/max (no printing), extracting every element from heap...")
-        extract_test_results = TestClass.test_remove_min_max(total_runs=100)
-        print("Testing Heap Delete, removing every element from the heap...")
+        print("Testing Extract min/max (no printing), extracting every element from heap... (and testing heap integrity after each attempt.)")
+        extract_test_results = TestClass.test_remove_min_max(total_runs=1000)
+        print("Testing Heap Delete, removing every element from the heap... (and testing heap integrity after each attempt.)")
         delete_test_results = TestClass.test_delete(total_runs=100)
         print("Done!")
         print(f"Build test results: {build_test_results}")
