@@ -2,6 +2,7 @@
 #  Read the README file for more information and sources.
 
 from typing import Optional, List
+import sys
 import math
 
 
@@ -45,10 +46,10 @@ class MaxMinHeap:
         :type unsorted_heap: list
         """
         self.heapob, self.size = unsorted_heap, len(unsorted_heap)
-        for i in range(self.size//2, -1, -1):
+        for i in range(self.size//2 + 1, -1, -1):
             self._heapify(i=i)
 
-    def heap_extract_max(self) -> Optional[int]:
+    def heap_extract_max(self, to_print: bool = True) -> Optional[int]:
         """Extracts and prints the max value in the heap.
         (Will delete the max value from the heap, (_remove_max),
         and keep maxmin heap property).
@@ -60,18 +61,19 @@ class MaxMinHeap:
         """
         if self.size == 0:
             print("Heap is empty.")
-            return None  # heap is empty, returns -1.
+            return  # heap is empty.
         max_element = self.heapob[0]
-        print(f"Maximum element in heap: {self.heapob[0]}")
+        if to_print:
+            print(f"Maximum element in heap: {self.heapob[0]}")
         self._remove_max()
         return max_element  # the element in root is the max element.
 
-    def heap_extract_min(self) -> Optional[int]:
+    def heap_extract_min(self, to_print: bool = True) -> Optional[int]:
         """Extracts and print the min value in the heap.
         (Will delete the min value from the heap, (_remove_min)),
         and keep maxmin heap property).
-        Complexity: O(1) for getting max element.
-        Complexity: O(log(n)) for removal of max element.
+        Complexity: O(1) for getting min element.
+        Complexity: O(log(n)) for removal of min element.
 
         :return: if heap is not empty, returns min value.
         :rtype: Optional[int]
@@ -83,18 +85,21 @@ class MaxMinHeap:
             min_element = self.heapob[0]
             self.heapob = self.heapob[:-1]
             self.size = len(self.heapob)  # or 0
-            print(f"Minimum element in heap: {min_element}")
+            if to_print:
+                print(f"Minimum element in heap: {min_element}")
             return min_element  # heap length is 1, returning the only element.
         if self.size == 2:
             min_element = self.heapob[1]
             self.heapob = self.heapob[:-1]
             self.size = len(self.heapob)  # or 1
-            print(f"Minimum element in heap: {min_element}")
+            if to_print:
+                print(f"Minimum element in heap: {min_element}")
             # heap length is 2, the only child is the minimum.
             return min_element
         min_element = min(self.heapob[1], self.heapob[2])
         self._remove_min()
-        print(f"Minimum element in heap: {min_element}")
+        if to_print:
+            print(f"Minimum element in heap: {min_element}")
         return min_element  # heap length is 1, returning the only element.
 
     def heap_insert(self, key: int):
@@ -110,8 +115,25 @@ class MaxMinHeap:
         self.size = len(self.heapob)  # or +=1
         self._bubble_up(i=self.size - 1)
 
-    def heap_delete(self, i: int, A: Optional[List] = None):
-        pass
+    def heap_delete(self, i: int):
+        """deletes the element in index *i-1!* from the heap.
+        Complexity same as _heapify: O(nlogn)
+
+        :param i: index to remove from heap.
+        :type i: int
+        """
+        i -= 1
+        if i >= self.size:
+            print("Index is not in range of heap.")
+            return
+        elif i == 0:
+            self.heap_extract_max(to_print=False)
+        else:
+            self.heapob[i] = sys.maxsize
+            self._bubble_up(i=i)  # move to root, O(log n)
+            self.heap_extract_max(to_print=False)  # O(log n)
+            for i in range(self.size-1, self.size // 2 - 1, -1):
+                self._bubble_up(i=i)
 
     def _heapify(self, i: int) -> None:
         """heapify common algorithm for max-min modifications, runs in O(log n)
@@ -204,7 +226,7 @@ class MaxMinHeap:
             self.heapob[i] = self.heapob[self.size - 1]
             self.heapob = self.heapob[:-1]
             self.size = len(self.heapob)
-            self._heapify(i)
+            self._heapify(i=i)
 
     def _bubble_up(self, i: int) -> None:
         """uses bubble_up_min and _max for moving up an element in the heap.
@@ -306,7 +328,7 @@ class MaxMinHeap:
         :return: returns the parent node index, -1 if it's the root.
         :rtype: int
         """
-        return (i-1) // 2
+        return (i-1) // 2 if (i-1) != 0 else 0
 
     def __has_parent(self, i: int) -> bool:
         """returns if a node has parent.
@@ -326,7 +348,7 @@ class MaxMinHeap:
         :return: grand-parent index, -1 if does not exit.
         :rtype: int
         """
-        return self.__get_parent(i=(i-1)//2)
+        return self.__get_parent(i=self.__get_parent(i=i))
 
     @staticmethod
     def _level(i: int) -> int:

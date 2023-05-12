@@ -5,38 +5,62 @@ from max_min_heap import MaxMinHeap
 
 class TestClass:
     @staticmethod
-    def test_remove_min_max():
+    def test_delete(total_runs: int):
         fail_count = 0
-        total_runs = 500
+        for _ in range(total_runs):
+            random_list = []
+            for _ in range(random.randint(1, 20)):
+                random_list.append(random.randint(1, 2000))
+            test_heap = MaxMinHeap()
+            print("-----")
+            test_heap.build_heap(unsorted_heap=random_list)
+            print(test_heap.heapob)
+            print(f"test result of build_heap: {(TestClass._is_max_min_heap(test_heap))}")
+            for _ in range(test_heap.size):
+                index_to_delete = random.randint(1, test_heap.size)
+                print(test_heap.heapob)
+                test_heap.heap_delete(i=index_to_delete)
+                if test_heap.size == 0:
+                    break
+                if not (TestClass._is_max_min_heap(test_heap)):
+                    print(f"Failed to delete an element {test_heap.heapob}, attempted to delete {index_to_delete}, size {test_heap.size}")
+                    print("-----")
+                    fail_count += 1
+        if fail_count > 0:
+            return (f"Fail/Total: {fail_count}/{total_runs} (fail for each attempt)")
+        return (f"All {total_runs}*<generated heap size> attempts PASSED.")
+
+    @staticmethod
+    def test_remove_min_max(total_runs: int):
+        fail_count = 0
         test_max = True
         for _ in range(total_runs):
             random_list = []
-            for _ in range(random.randint(1, 15)):
+            for _ in range(random.randint(1, 512)):
                 random_list.append(random.randint(-2000, 2000))
             test_heap = MaxMinHeap()
             test_heap.build_heap(unsorted_heap=random_list)
-            for _ in range(test_heap.size):
+            for _ in range(test_heap.size - 1):
                 if test_max:
-                    test_heap.heap_extract_max()
+                    test_heap.heap_extract_max(to_print=False)
                     if not (TestClass._is_max_min_heap(test_heap)):
                         print(f"Failed to extract max from heap: {test_heap.heapob}")
                         fail_count += 1
                 else:
-                    test_heap.heap_extract_min()
+                    test_heap.heap_extract_min(to_print=False)
                     if not (TestClass._is_max_min_heap(test_heap)):
                         print(f"Failed to extract min from heap: {test_heap.heapob}")
                         fail_count += 1
         if fail_count > 0:
             return (f"Fail/Total: {fail_count}/{total_runs} (fail for each attempt)")
-        return (f"All {total_runs} attempts PASSED.")
+        return (f"All {total_runs}*<generated heap size> attempts PASSED.")
 
     @staticmethod
-    def test_build_heap():
+    def test_build_heap(total_runs: int):
         fail_count = 0
-        total_runs = 500
         for i in range(total_runs):
             random_list = []
-            for i in range(random.randint(1, 15)):
+            for i in range(random.randint(1, 512)):
                 random_list.append(random.randint(-2000, 2000))
             test_heap = MaxMinHeap()
             test_heap.build_heap(unsorted_heap=random_list)
@@ -52,9 +76,8 @@ class TestClass:
         return (f"All {total_runs} attempts PASSED.")
 
     @staticmethod
-    def test_insert_heap():
+    def test_insert_heap(total_runs: int):
         fail_count = 0
-        total_runs = 500
         for _ in range(total_runs):
             random_list = []
             for _ in range(random.randint(1, 512)):
@@ -76,7 +99,7 @@ class TestClass:
     @staticmethod
     def _is_max_min_heap(heap: MaxMinHeap):
         if heap.size == 0:
-            return False
+            return True
         for index, value in enumerate(heap.heapob):
             if heap._level(index) % 2 == 0:  # max level
                 for j in range(2 * index + 1, min(2 * index + 3, heap.size)):
@@ -101,12 +124,3 @@ class TestClass:
                         # print(heap.heapob, j, index, heap.heapob[j], heap.heapob[index], heap._level(index))
                         return False
         return True
-
-
-if __name__ == "__main__":
-    build_test_results = TestClass.test_build_heap()
-    insert_test_results = TestClass.test_insert_heap()
-    extract_test_results = TestClass.test_remove_min_max()
-    print(f"Build test results: {build_test_results}")
-    print(f"Insert test results: {insert_test_results}")
-    print(f"Extract test results: {extract_test_results}")

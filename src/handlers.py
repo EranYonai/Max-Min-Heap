@@ -62,7 +62,7 @@ class UserHandler:
                 self._print_heap()
 
     def operate_on_heap(self, action):
-        if action > Actions.NUM_ACTIONS:
+        if self._is_str(action) or action > Actions.NUM_ACTIONS:
             print("Invalid action.")
             return
         if action not in [1, 2, 3] and self.max_min_heap.size == 0:
@@ -75,12 +75,14 @@ class UserHandler:
             inp = self.get_user_input(prompt="1 to build with cli, 2 to heap from file: ")
             if inp == 1:
                 self._build_cli_heap()
-            else:
+            elif inp == 2:
                 inp = self.get_user_input(prompt="Enter full file location: ")
                 if self._is_str(inp):
                     self.max_min_heap.build_heap(InputHandler.read_file_and_parse(file_path=inp))  # type: ignore
                 else:
                     print("Input is not string.")
+            else:
+                print("Invalid action")
         elif action == Actions.PRINT_HEAP:
             self._print_heap()
         elif action == Actions.HEAPEX_MAX:
@@ -134,13 +136,13 @@ class UserHandler:
 
     def _run_tests(self):
         print("Testing Build Heap")
-        build_test_results = TestClass.test_build_heap()
+        build_test_results = TestClass.test_build_heap(total_runs=1000)
         print("Testing Heap Insert")
-        insert_test_results = TestClass.test_insert_heap()
+        insert_test_results = TestClass.test_insert_heap(total_runs=1000)
         print("Testing Extract min/max (no printing), extracting every element from heap...")
-        extract_test_results = TestClass.test_remove_min_max()
+        extract_test_results = TestClass.test_remove_min_max(total_runs=100)
         print("Testing Heap Delete, removing every element from the heap...")
-        delete_test_results = TestClass.test_delete()
+        delete_test_results = TestClass.test_delete(total_runs=100)
         print("Done!")
         print(f"Build test results: {build_test_results}")
         print(f"Insert test results: {insert_test_results}")
