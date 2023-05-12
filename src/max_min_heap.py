@@ -2,7 +2,6 @@
 #  Read the README file for more information and sources.
 
 from typing import Optional, List
-import sys
 import math
 
 
@@ -39,10 +38,10 @@ class MaxMinHeap:
         return self.size
 
     def build_heap(self, unsorted_heap: list):
-        """Building heap using heapify (top-bottom).
-        Complexity: O(n)
+        """Building heap using heapify.
+        Complexity: O(n) (floyd build heap)
 
-        :param unsorted_heap: _description_
+        :param unsorted_heap: unsorted list of integers
         :type unsorted_heap: list
         """
         self.heapob, self.size = unsorted_heap, len(unsorted_heap)
@@ -72,7 +71,7 @@ class MaxMinHeap:
         """Extracts and print the min value in the heap.
         (Will delete the min value from the heap, (_remove_min)),
         and keep maxmin heap property).
-        Complexity: O(1) for getting min element.
+        Complexity: O(1) for getting min element. (min(heap[1], heap[2]))
         Complexity: O(log(n)) for removal of min element.
 
         :return: if heap is not empty, returns min value.
@@ -103,7 +102,8 @@ class MaxMinHeap:
         return min_element  # heap length is 1, returning the only element.
 
     def heap_insert(self, key: int):
-        """heap_insert heap_insert insert a key into the heap. Complexity: O(log(n)).
+        """heap_insert heap_insert insert a key into the heap. 
+        Complexity: O(log(n)).
 
         :param key: a value to be inserted to the heap.
         :type key: int
@@ -140,7 +140,8 @@ class MaxMinHeap:
         self.build_heap(unsorted_heap=self.heapob)
 
     def _heapify(self, i: int) -> None:
-        """heapify common algorithm for max-min modifications, runs in O(log n)
+        """heapify common algorithm for max-min modifications.
+        Complexity O(log n)
         builds heap from up to bottom
 
         :param i: an index
@@ -184,7 +185,7 @@ class MaxMinHeap:
         assumes that index is a valid index, in an even depth in the heap.
         moves index to a the correct place.
 
-        :param i: _description_
+        :param i: index
         :type i: int
         """
         child = False
